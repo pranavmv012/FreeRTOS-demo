@@ -25,6 +25,9 @@
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
 #include "debug_serial.h"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "cmsis_os2.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,7 +48,8 @@
 /* Private variables ---------------------------------------------------------*/
 
 /* USER CODE BEGIN PV */
-
+static void task1_handler(void* parameters);
+static void task2_handler(void* parameters);
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -67,6 +71,10 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+	TaskHandle_t task1_handle;
+	TaskHandle_t task2_handle;
+
+	BaseType_t status;
 
   /* USER CODE END 1 */
 
@@ -90,7 +98,16 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  status = xTaskCreate(task1_handler, "Task-1", 200, "Hello world from Task-1", 2, &task1_handle);
 
+  configASSERT(status == pdPASS);
+
+  status = xTaskCreate(task2_handler, "Task-2", 200, "Hello world from Task-2", 2, &task2_handle);
+
+  configASSERT(status == pdPASS);
+
+  //start the freeRTOS scheduler
+  vTaskStartScheduler();
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -156,7 +173,26 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+static void task1_handler(void* parameters)
+{
+	while(1)
+	{
+		debug_print("%s\n", (char*)parameters);
+		vTaskDelay(2500);
+	}
 
+}
+
+
+static void task2_handler(void* parameters)
+{
+	while(1)
+	{
+		debug_print("%s\n", (char*)parameters);
+		vTaskDelay(5000);
+
+	}
+}
 /* USER CODE END 4 */
 
 /**
