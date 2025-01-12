@@ -37,6 +37,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define DWT_CTRL    (*(volatile uint32_t*)0xE0001000) //data watch point reg
 
 /* USER CODE END PD */
 
@@ -98,6 +99,16 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+
+  //Enable the CYCCNT counter.
+  DWT_CTRL |= ( 1 << 0);
+
+//  SEGGER_UART_init(500000);
+
+  SEGGER_SYSVIEW_Conf();
+  SEGGER_SYSVIEW_Start();
+
+  /*Create Tasks*/
   status = xTaskCreate(task1_handler, "Task-1", 200, "Hello world from Task-1", 2, &task1_handle);
 
   configASSERT(status == pdPASS);
@@ -177,8 +188,8 @@ static void task1_handler(void* parameters)
 {
 	while(1)
 	{
-		debug_print("%s\n", (char*)parameters);
-		vTaskDelay(2500);
+		printf("%s\n", (char*)parameters);
+//		vTaskDelay(2500);
 	}
 
 }
@@ -188,8 +199,8 @@ static void task2_handler(void* parameters)
 {
 	while(1)
 	{
-		debug_print("%s\n", (char*)parameters);
-		vTaskDelay(5000);
+		printf("%s\n", (char*)parameters);
+//		vTaskDelay(5000);
 
 	}
 }
